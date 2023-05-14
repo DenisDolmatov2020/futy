@@ -1,4 +1,4 @@
-const Post = require("../schemes/Post.js")
+const Post = require("../models/Post.js")
 const fileService = require("./file.service.js")
 
 class PostService {

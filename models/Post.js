@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose');
 
 const Post = new Schema({
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: false },
     message: { type: String },
     file: { type: String },
     changeable: { type: Boolean, default: false, required: true },

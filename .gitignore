@@ -102,7 +102,6 @@ dist
 
 # vuepress v2.x temp and cache directory
 .temp
-.cache
 
 # Serverless directories
 .serverless/
@@ -125,3 +124,41 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+# Node.js
+npm-debug.log
+*.env
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+gen/
+build/
+
+
+# Mac OS
+.DS_Store
+
+# Logs and databases
+*.sqlite
+
+
+# Dependencies
+yarn-error.log
+
+# Editor configuration
+.vscode/
+*.swp
+*.swo
+*.swn
+
+# Built files
+dist/
+
+# Miscellaneous
+
+Thumbs.db

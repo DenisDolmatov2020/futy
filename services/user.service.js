@@ -1,11 +1,12 @@
-const User = require("../schemes/User.js")
-const fileService = require("./file.service.js")
-const bcrypt = require("bcryptjs");
+const User = require('../models/User.js')
+const bcrypt = require('bcryptjs')
 
-class PostService {
-    async create(user, file) {
-        const {email, username, password} = user;
+class UserService {
+    async create(user) {
+        console.log(user)
+        const {email, username, password} = user
         const candidate = await User.findOne({email})
+        console.log('++', candidate)
         if (candidate) {
             throw new Error('Email ready')
         }
@@ -40,4 +41,4 @@ class PostService {
 }
 
 
-module.exports = new PostService()
+module.exports = new UserService()
