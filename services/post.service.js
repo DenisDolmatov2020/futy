@@ -2,17 +2,17 @@ const Post = require("../models/Post.js")
 const fileService = require("./file.service.js")
 
 class PostService {
-    async create(post, file) {
-        let fileName = ''
-        if (file) {
-            fileName = fileService.saveFile(file)
-        }
-
-        return await Post.create({...post, file: fileName})
+    create(postData, filesData) {
+        postData.files = filesData.map(file => file.filename);
+        return Post.create(postData);
     }
 
     async list() {
-        return Post.find({ showAt: {$lte: new Date() }}).populate('user', {'password': 0})
+        return Post.find({ nextShowAt: {$lte: new Date() }}).populate('user', 'username')
+    }
+
+    async closed() {
+        return Post.find().populate('user', 'username')
     }
 
     async detail(id) {

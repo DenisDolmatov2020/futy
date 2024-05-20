@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs')
 const { validationResult } = require('express-validator')
 const User = require('../models/User')
 const UserService = require('../services/user.service.js')
@@ -8,16 +8,17 @@ const CryptoService = require('../services/crypto.service')
 class UserController {
     async registration(req, res) {
         try {
+            console.log('REQ', req.body)
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors })
             }
 
             await UserService.create(req.body)
-            await SMPTService.sendConfirmationEmail(req.body)
+            // await SMPTService.sendConfirmationEmail(req.body)
             return res.json({ message: 'Registration successful' })
         } catch (error) {
-            console.log(error)
+            console.error(error)
             res.status(400).json({ message: error.message })
         }
     }
@@ -43,27 +44,27 @@ class UserController {
 
     async confirmEmail(req, res) {
         try {
-            const { email } = req.query;
+            const { email } = req.query
 
-            const user = await User.findOne({ email });
+            const user = await User.findOne({ email })
 
             if (!user) {
-                return res.status(404).send({ message: 'User not found' });
+                return res.status(404).send({ message: 'User not found' })
             }
 
             if (user.confirmed) {
-                return res.status(400).send({ message: 'Email already confirmed' });
+                return res.status(400).send({ message: 'Email already confirmed' })
             }
 
             // Update confirmation user in DB
             user.set('confirmed', true)
             await user.save()
 
-            return res.status(200).send({ message: 'Email confirmed successfully' });
+            return res.status(200).send({ message: 'Email confirmed successfully' })
         } catch (error) {
-            console.error(error);
+            console.error(error)
 
-            return res.status(500).send({ message: 'Server error' });
+            return res.status(500).send({ message: 'Server error' })
         }
     }
 
@@ -73,10 +74,10 @@ class UserController {
             const user = await User.findOne({ id: req.userId })
             // Возвращаем только необходимые данные пользователя
             const { username, email, confirmed } = user
-            res.status(200).json({ username, email, confirmed });
+            res.status(200).json({ username, email, confirmed })
         } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Server error', error });
+            console.error(error)
+            res.status(500).json({ message: 'Server error', error })
         }
     }
 }

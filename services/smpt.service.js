@@ -2,48 +2,49 @@ const nodemailer = require('nodemailer')
 require('dotenv').config()
 
 const confirmationEmailSubject = 'Confirm your email'
-const confirmationEmailHtml = `<html>
+const confirmationEmailHtml = `<html lang="en">
 <head>
+<title>Time Caps</title>
   <style>
     body {
-        background-color: #F4F4F4;
-        font-family: Arial, sans-serif;
-        padding: 20px;
-        margin: 0;
+        background-color: #F4F4F4
+        font-family: Arial, sans-serif
+        padding: 20px
+        margin: 0
     }
 
     .container {
-        border-radius: 10px;
-        background-color: #FFFFFF;
-        padding: 20px;
-        box-shadow: 0px 0px 10px #CCCCCC;
+        border-radius: 10px
+        background-color: #FFFFFF
+        padding: 20px
+        box-shadow: 0px 0px 10px #CCCCCC
     }
 
     .btn {
-        display: inline-block;
-        background-color: #4CAF50;
-        color: #FFFFFF;
-        padding: 10px 20px;
-        margin-top: 20px;
-        border-radius: 5px;
-        text-decoration: none;
-        cursor: pointer;
+        display: inline-block
+        background-color: #4CAF50
+        color: #FFFFFF
+        padding: 10px 20px
+        margin-top: 20px
+        border-radius: 5px
+        text-decoration: none
+        cursor: pointer
     }
 
     .btn:hover {
-        background-color: #3E8E41;
+        background-color: #3E8E41
     }
 
     .link {
-        display: inline-block;
-        margin-top: 20px;
-        font-size: 14px;
-        color: #666666;
-        text-decoration: none;
+        display: inline-block
+        margin-top: 20px
+        font-size: 14px
+        color: #666666
+        text-decoration: none
     }
 
     .link:hover {
-        color: #333333;
+        color: #333333
     }
 
     </style>
@@ -57,7 +58,7 @@ const confirmationEmailHtml = `<html>
     <p><a href="{{confirmationLink}}">{{confirmationLink}}</a></p>
   </div>
 </body>
-</html>`;
+</html>`
 
 class SMPTService {
     async sendConfirmationEmail(user) {
@@ -69,11 +70,11 @@ class SMPTService {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASSWORD
             }
-        });
+        })
 
-        const confirmationLink = `${process.env.API_URL}:${process.env.API_PORT}/api/user/confirm?email=${user.email}`;
+        const confirmationLink = `${process.env.API_URL}:${process.env.API_PORT}/api/user/confirm?email=${user.email}`
 
-        const html = confirmationEmailHtml.replace('{{confirmationLink}}', confirmationLink);
+        const html = confirmationEmailHtml.replace('{{confirmationLink}}', confirmationLink)
 
         const mailOptions = {
             from: process.env.SMTP_USER,

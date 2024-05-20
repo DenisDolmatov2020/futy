@@ -13,12 +13,14 @@ module.exports = function (req, res, next) {
             return res.status(401).json({ message: 'User not authorized' })
         }
         const decodedData = jwt.verify(token, secret)
-        req.user = decodedData.id
-        req.body.user = decodedData.id
+        if (!req.body?.anonymous) {
+            req.user = decodedData.id
+            req.body.user = decodedData.id
+        }
 
         next()
     } catch (error) {
-        console.log(error)
-        return res.status(403).json({ message: 'Error authorization' })
+        console.error(error.message)
+        return res.status(401).json({ message: error?.message || 'Error authorization' })
     }
 }
