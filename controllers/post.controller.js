@@ -3,7 +3,9 @@ const PostService = require("../services/post.service.js")
 class PostController {
     async create(req, res) {
         try {
-            const post = await PostService.create(req.body, req.files);
+            const post = await PostService.create(
+                { ...req.body, user: req.user }, req.files
+            );
             res.status(201).json(post);
         } catch (e) {
             console.error(e);
@@ -23,6 +25,15 @@ class PostController {
     async closed(req, res) {
         try {
             const posts = await PostService.closed()
+            return res.json(posts)
+        } catch (e) {
+            res.status(500).json(e)
+        }
+    }
+
+    async myCaps(req, res) {
+        try {
+            const posts = await PostService.myCaps(req.user)
             return res.json(posts)
         } catch (e) {
             res.status(500).json(e)

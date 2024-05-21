@@ -7,5 +7,7 @@ UserRouter.post('/registration', UserController.registration)
 UserRouter.get('/confirm', UserController.confirmEmail)
 UserRouter.post('/login', UserController.login)
 UserRouter.get('/profile', userMiddleware, UserController.profile)
+UserRouter.patch('/profile', userMiddleware, UserController.updateProfile)
+UserRouter.patch('/password', userMiddleware, UserController.updatePassword)
 
 module.exports = UserRouter

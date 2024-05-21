@@ -1,5 +1,4 @@
 const Post = require("../models/Post.js")
-const fileService = require("./file.service.js")
 
 class PostService {
     create(postData, filesData) {
@@ -12,7 +11,11 @@ class PostService {
     }
 
     async closed() {
-        return Post.find().populate('user', 'username')
+        return Post.find({ nextShowAt: {$gte: new Date() }}).populate('user', 'username')
+    }
+
+    async myCaps(id) {
+        return Post.find({ user: id }).sort({ createdAt: -1 })
     }
 
     async detail(id) {

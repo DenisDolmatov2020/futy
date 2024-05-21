@@ -73,13 +73,70 @@ class UserController {
             // Найти пользователя по идентификатору, сохраненному в поле userId в токене
             const user = await User.findOne({ id: req.userId })
             // Возвращаем только необходимые данные пользователя
-            const { username, email, confirmed } = user
-            res.status(200).json({ username, email, confirmed })
+            const { username, email, confirmed, about } = user
+            res.status(200).json({ username, email, confirmed, about })
         } catch (error) {
             console.error(error)
             res.status(500).json({ message: 'Server error', error })
         }
     }
+
+    async updateProfile(req, res) {
+        try {
+            // Найти пользователя по идентификатору, сохраненному в поле userId в токене
+            const user = await User.findOne({ id: req.userId });
+
+            // Если пользователь не найден, вернуть ошибку
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            // Обновить данные пользователя с помощью данных из запроса
+            const { username, email, about } = req.body;
+
+            if (username) user.username = username;
+            if (email) user.email = email;
+            if (about) user.about = about;
+
+            // Сохранить обновленные данные пользователя в базе данных
+            await user.save();
+            res.status(200).json({ message: 'Profile was updated'});
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Server error', error });
+        }
+    }
+
+
+    async updatePassword(req, res) {
+        try {
+            // Найти пользователя по идентификатору, сохраненному в поле userId в токене
+            const user = await User.findOne({ id: req.userId });
+
+            // Если пользователь не найден, вернуть ошибку
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            const { oldPassword, newPassword } = req.body;
+
+            // Проверить, совпадает ли старый пароль
+            const isMatch = await bcrypt.compare(oldPassword, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ message: 'Incorrect old password' });
+            }
+
+            // Хешировать новый пароль и сохранить его
+            user.password = await bcrypt.hash(newPassword, 10);
+            await user.save();
+
+            res.status(200).json({ message: 'Password was updated' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Server error', error });
+        }
+    }
+
 }
 
 module.exports = new UserController()

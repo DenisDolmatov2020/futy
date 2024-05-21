@@ -21,6 +21,7 @@ const upload = multer({ storage: storage });
 PostRoutes.post('/', userMiddleware, upload.array('files'), PostController.create)
 PostRoutes.get('/', PostController.list)
 PostRoutes.get('/closed', PostController.closed)
+PostRoutes.get('/my-caps', userMiddleware, PostController.myCaps)
 PostRoutes.get('/:id', PostController.detail)
 PostRoutes.put('/', PostController.update)
 PostRoutes.delete('/:id', PostController.delete)
