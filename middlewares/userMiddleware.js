@@ -14,8 +14,8 @@ module.exports = function (req, res, next) {
         }
         const decodedData = jwt.verify(token, secret)
         if (!req.body?.anonymous) {
-            req.user = decodedData.id
-            req.body.user = decodedData.id
+            req.userId = decodedData.id
+            req.body.userId = decodedData.id
         }
 
         next()

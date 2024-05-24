@@ -4,18 +4,48 @@ const User = require('../models/User')
 const UserService = require('../services/user.service.js')
 const SMPTService = require('../services/smpt.service')
 const CryptoService = require('../services/crypto.service')
+const { ethers} = require('ethers')
+
 
 class UserController {
+    async authenticateWithMetaMask(req, res) {
+        try {
+            const { address, signature } = req.body
+            const message = `Authenticate with address: ${address}`
+
+            if (!address || !signature) {
+                return res.status(401).json({ message: 'Invalid signature or address' })
+            }
+
+            const recoveredAddress = ethers.verifyMessage(message, signature)
+            if (recoveredAddress.toLowerCase() !== address.toLowerCase()) {
+                return res.status(401).json({ message: 'Invalid signature' })
+            }
+
+            let user = await User.findOne({ address })
+            if (!user && address) {
+                // Если пользователь не существует, создаем нового пользователя
+                user = await User.create({ email: address })
+            }
+
+            console.log('USER', user)
+            const token = CryptoService.generateAccessToken(user._id)
+            return res.json({ token })
+        } catch (error) {
+            console.error(error)
+            res.status(400).json({ message: 'Authentication error', error: error.message })
+        }
+    }
+
     async registration(req, res) {
         try {
-            console.log('REQ', req.body)
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors })
             }
 
             await UserService.create(req.body)
-            // await SMPTService.sendConfirmationEmail(req.body)
+            await SMPTService.sendConfirmationEmail(req.body.email)
             return res.json({ message: 'Registration successful' })
         } catch (error) {
             console.error(error)
@@ -70,8 +100,11 @@ class UserController {
 
     async profile (req, res) {
         try {
+            console.log('U ID', req.userId)
             // Найти пользователя по идентификатору, сохраненному в поле userId в токене
-            const user = await User.findOne({ id: req.userId })
+            const user = await User.findOne({ _id: req.userId })
+
+            console.log('U ID', user)
             // Возвращаем только необходимые данные пользователя
             const { username, email, confirmed, about } = user
             res.status(200).json({ username, email, confirmed, about })
@@ -84,7 +117,7 @@ class UserController {
     async updateProfile(req, res) {
         try {
             // Найти пользователя по идентификатору, сохраненному в поле userId в токене
-            const user = await User.findOne({ id: req.userId });
+            const user = await User.findOne({ _id: req.userId });
 
             // Если пользователь не найден, вернуть ошибку
             if (!user) {
@@ -111,7 +144,7 @@ class UserController {
     async updatePassword(req, res) {
         try {
             // Найти пользователя по идентификатору, сохраненному в поле userId в токене
-            const user = await User.findOne({ id: req.userId });
+            const user = await User.findOne({ _id: req.userId });
 
             // Если пользователь не найден, вернуть ошибку
             if (!user) {

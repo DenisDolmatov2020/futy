@@ -61,7 +61,7 @@ const confirmationEmailHtml = `<html lang="en">
 </html>`
 
 class SMPTService {
-    async sendConfirmationEmail(user) {
+    async sendConfirmationEmail(email) {
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: process.env.SMTP_PORT,
@@ -72,13 +72,13 @@ class SMPTService {
             }
         })
 
-        const confirmationLink = `${process.env.API_URL}:${process.env.API_PORT}/api/user/confirm?email=${user.email}`
+        const confirmationLink = `${process.env.API_URL}:${process.env.API_PORT}/api/user/confirm?email=${email}`
 
         const html = confirmationEmailHtml.replace('{{confirmationLink}}', confirmationLink)
 
         const mailOptions = {
             from: process.env.SMTP_USER,
-            to: user.email,
+            to: email,
             subject: confirmationEmailSubject,
             html
         }
