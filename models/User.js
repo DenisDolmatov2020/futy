@@ -8,7 +8,9 @@ const User = new Schema({
     avatar: {type: String},
     password: {type: String, required: true},
     confirmed: {type: Boolean, default: false},
-    balance: {type: Number, default: 0}
+    balance: {type: Number, default: 0},
+    salt: {type: String, required: true},
+    encryptedPrivateKey: {type: String, required: true}
 })
 
 module.exports = model('User', User)

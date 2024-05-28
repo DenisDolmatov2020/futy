@@ -1,42 +1,61 @@
 const User = require('../models/User.js')
 const bcrypt = require('bcryptjs')
+const CryptoService = require('./crypto.service')
 
 class UserService {
-    async create(user) {
-        console.log(user)
-        const {email, username, password} = user
+    async create({ username, email, encryptedPrivateKey, salt, password }) {
+        // Хеширование пароля
         const candidate = await User.findOne({email})
-        console.log('++', candidate)
+
         if (candidate) {
             throw new Error('Email ready')
         }
-        const hashPassword = bcrypt.hashSync(password, 7);
-        return User.create({email, username, password: hashPassword})
+        const hashedPassword = await bcrypt.hash(password, 10)
+
+        // Сохранение пользователя в базе данных (псевдокод)
+        const newUser = new User({
+            username,
+            email,
+            encryptedPrivateKey,
+            salt,
+            password: hashedPassword
+        })
+
+        await newUser.save()
     }
 
-    async list() {
-        return User.find({ showAt: {$lte: new Date() }}).populate('user', {'password': 0})
-    }
-
-    async detail(id) {
-        if (!id) {
-            throw new Error('не указан ID')
+    async detail({ email, password }) {
+        // Поиск пользователя и проверка пароля
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new Error('User not found')
         }
-        return User.findById(id, {'password': 0})
+
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+            throw new Error('Invalid credentials')
+        }
+        // Генерация JWT токена
+        const token = CryptoService.generateAccessToken(user._id)
+
+        return {
+            email: user.email,
+            address: user.address,
+            salt: user.salt,
+            encryptedPrivateKey: user.encryptedPrivateKey,
+            token
+        }
     }
 
-    async update(User) {
-        if (!User._id) {
-            throw new Error('не указан ID')
-        }
-        return User.findByIdAndUpdate(User._id, User, {new: true})
-    }
+    async update(data) {
+        const user = await User.findOne({ _id: data.userId });
 
-    async delete(id) {
-        if (!id) {
-            throw new Error('не указан ID')
+        if (!user) {
+            let error = new Error('User not found')
+            error.status = 404
+            throw error
         }
-        return User.findByIdAndDelete(id)
+        return User.findByIdAndUpdate(data.userId, data, {new: true})
     }
 }
 

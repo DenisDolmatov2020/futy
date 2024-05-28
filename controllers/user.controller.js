@@ -37,6 +37,7 @@ class UserController {
         }
     }
 
+
     async registration(req, res) {
         try {
             const errors = validationResult(req)
@@ -45,7 +46,7 @@ class UserController {
             }
 
             await UserService.create(req.body)
-            await SMPTService.sendConfirmationEmail(req.body.email)
+            // await SMPTService.sendConfirmationEmail(req.body.email)
             return res.json({ message: 'Registration successful' })
         } catch (error) {
             console.error(error)
@@ -55,20 +56,12 @@ class UserController {
 
     async login(req, res) {
         try {
-            const {email, password} = req.body
-            const user = await User.findOne({email})
-            if (!user) {
-                return res.status(401).json({ message: `User with email ${email} not found`})
-            }
-            const validPassword = bcrypt.compareSync(password, user.password)
-            if (!validPassword) {
-                return res.status(401).json({ message: 'Email and password mismatch' })
-            }
-            const token = CryptoService.generateAccessToken(user._id)
-            return res.json({ token })
+            const user = await UserService.detail(req.body)
+
+            return res.json(user)
         } catch (error) {
             console.error(error)
-            res.status(400).json({ message: 'login error' })
+            res.status(error?.status || 401).json({ message: error.message || 'Error authorization' })
         }
     }
 
@@ -100,11 +93,9 @@ class UserController {
 
     async profile (req, res) {
         try {
-            console.log('U ID', req.userId)
             // Найти пользователя по идентификатору, сохраненному в поле userId в токене
             const user = await User.findOne({ _id: req.userId })
 
-            console.log('U ID', user)
             // Возвращаем только необходимые данные пользователя
             const { username, email, confirmed, about } = user
             res.status(200).json({ username, email, confirmed, about })
@@ -116,30 +107,13 @@ class UserController {
 
     async updateProfile(req, res) {
         try {
-            // Найти пользователя по идентификатору, сохраненному в поле userId в токене
-            const user = await User.findOne({ _id: req.userId });
-
-            // Если пользователь не найден, вернуть ошибку
-            if (!user) {
-                return res.status(404).json({ message: 'User not found' });
-            }
-
-            // Обновить данные пользователя с помощью данных из запроса
-            const { username, email, about } = req.body;
-
-            if (username) user.username = username;
-            if (email) user.email = email;
-            if (about) user.about = about;
-
-            // Сохранить обновленные данные пользователя в базе данных
-            await user.save();
-            res.status(200).json({ message: 'Profile was updated'});
+            const data = await UserService.update({ userId: req.userId, ...req.body.user })
+            res.status(200).json({ message: 'Profile was updated', data});
         } catch (error) {
             console.error(error);
-            res.status(500).json({ message: 'Server error', error });
+            res.status(error.status).json({ message: 'Server error', error });
         }
     }
-
 
     async updatePassword(req, res) {
         try {
@@ -154,6 +128,7 @@ class UserController {
             const { oldPassword, newPassword } = req.body;
 
             // Проверить, совпадает ли старый пароль
+
             const isMatch = await bcrypt.compare(oldPassword, user.password);
             if (!isMatch) {
                 return res.status(400).json({ message: 'Incorrect old password' });
